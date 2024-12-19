@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPS Konum Takibi</title>
+</head>
+<body>
+    <h1>GPS Konum Takibi Başlatıldı</h1>
+    <p>Her 30 saniyede bir konum verisi gönderilecektir.</p>
+
+    <script>
+        // Telegram Bot API'yi kullanarak mesaj gönderme
+        function sendLocationToTelegram(latitude, longitude) {
+            const token = '8055523671:AAH6_SVWU0Ly8ugkyrw_UO1jS1vt06m71Co';  // Bot token'ınız
+            const chatId = '1568538396';  // Telegram'daki chat ID'nizi buraya koyun
+            const url = `https://api.telegram.org/bot${token}/sendMessage?chat_id=${chatId}&text=Konum: Enlem: ${latitude}, Boylam: ${longitude}`;
+
+            fetch(url, { method: 'GET' });
+        }
+
+        // Konum alma ve izni kontrol etme
+        function getLocation() {
+            if (navigator.geolocation) {
+                // GPS izni al
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    let latitude = position.coords.latitude;
+                    let longitude = position.coords.longitude;
+
+                    // Konum bilgisini Telegram'a gönder
+                    sendLocationToTelegram(latitude, longitude);
+
+                    // Her 30 saniyede bir yeni konum göndermek için
+                    setInterval(function() {
+                        navigator.geolocation.getCurrentPosition(function(position) {
+                            let latitude = position.coords.latitude;
+                            let longitude = position.coords.longitude;
+                            sendLocationToTelegram(latitude, longitude);
+                        });
+                    }, 30000);  // 30 saniye aralıklarla konum gönderme
+                }, function(error) {
+                    alert("GPS izni verilmedi veya konum alınamadı.");
+                });
+            } else {
+                alert("Geolocation API'si tarayıcınızda desteklenmiyor.");
+            }
+        }
+
+        // Sayfa yüklendiğinde konum alma işlemini başlat
+        window.onload = function() {
+            getLocation();
+        };
+    </script>
+</body>
+</html>
